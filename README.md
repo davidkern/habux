@@ -2,6 +2,10 @@
 
 HAB truck camper frontend user interface.
 
+## Dependencies
+
+* `cargo install wasm-pack`
+
 ## License
 
 Licensed under either of

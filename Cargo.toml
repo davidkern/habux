@@ -1,9 +1,15 @@
 [package]
 name = "habux"
 version = "0.1.0"
-authors = ["David <david@mju.io>"]
+authors = ["David Kern <david@mju.io>"]
 edition = "2018"
+license = "MIT/Apache-2.0"
+repository = "https://github.com/davidkern/habux"
+description = "HAB truck camper frontend user interface."
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+crate-type = ["cdylib"]
 
 [dependencies]
+wasm-bindgen = "0.2.68"
+yew = "0.17.4"
