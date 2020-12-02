@@ -1,5 +1,2 @@
 import '../static/style.scss';
-
-import("../pkg").then(module => {
-    module.run_app();
-});
+import('../pkg/index.js').catch(console.error);

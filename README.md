@@ -6,6 +6,12 @@ HAB truck camper frontend user interface.
 
 * `cargo install wasm-pack`
 
+## Build/Start/Test
+
+* `yarn build` - build production assets to `dist`
+* `yarn start` - build and watch for development
+* `yarn test` - run cargo and wasm-pack tests
+
 ## License
 
 Licensed under either of
