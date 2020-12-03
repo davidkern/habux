@@ -27,6 +27,7 @@ impl Component for Model {
     type Properties = ();
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
+        link.send_message(Msg::Connect);
         Model {
             ws: None,
             link,
@@ -73,7 +74,6 @@ impl Component for Model {
         html! {
             <div>
                 <p>{ "Hello, world" }</p>
-                <p><button onclick=self.link.callback(|_| Msg::Connect)>{ "Connect" }</button></p><br />
                 <p>{ "Connected: "} { !self.ws.is_none() }</p><br />
             </div>
         }
