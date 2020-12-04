@@ -1,4 +1,3 @@
-use anyhow::Result;
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 use yew::format::Json;
@@ -8,24 +7,16 @@ use core::time::Duration;
 use yew::services::timeout::TimeoutTask;
 use std::rc::Rc;
 
+mod socket;
+
+use socket::Socket;
+
 /// Amount of time to wait before attempting reconnect
 const RECONNECT_DURATION: Duration = Duration::from_secs(2);
 
-/// Maintains state of the websocket
-enum Socket {
-    Disconnected,
-    ReconnectWait(Rc<TimeoutTask>),
-    Connecting(Rc<WebSocketTask>),
-    Connected(Rc<WebSocketTask>),
-}
-
-impl Socket {
-    fn is_connected(&self) -> bool {
-        match self {
-            Self::Connected(_) => true,
-            _ => false
-        }
-    }
+/// UI Socket url
+fn ui_socket_url() -> String {
+    format!("ws://{}/socket/ui", yew::utils::host().unwrap()).to_string()
 }
 
 struct Model {
@@ -76,7 +67,7 @@ impl Component for Model {
                     }
                 });
                 if !self.socket.is_connected() {
-                    let socket = WebSocketService::connect("ws://localhost:8080/ws/", cb_data, cb_error.into()).unwrap();
+                    let socket = WebSocketService::connect(&ui_socket_url(), cb_data, cb_error.into()).unwrap();
                     self.socket = Socket::Connecting(Rc::new(socket));
                 }
                 false

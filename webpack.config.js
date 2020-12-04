@@ -18,7 +18,7 @@ module.exports = (env, argv) => {
         output: {
             path: distPath,
             filename: 'index.js',
-            webassemblyModuleFilename: 'index_bg.wasm'
+            webassemblyModuleFilename: 'index.wasm'
         },
         module: {
             rules: [
@@ -35,8 +35,7 @@ module.exports = (env, argv) => {
         plugins: [
             new CopyWebpackPlugin({
                 patterns: [
-                    {from: './static', to: distPath},
-                    {from: './static/index.html', to: pkgPath}
+                    {from: './static', to: distPath}
                 ]
             }),
             new WasmPackPlugin({
