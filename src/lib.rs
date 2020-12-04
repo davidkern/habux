@@ -2,23 +2,46 @@ use anyhow::Result;
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 use yew::format::Json;
-use yew::services::ConsoleService;
+use yew::services::{ConsoleService, TimeoutService};
 use yew::services::websocket::{WebSocketService, WebSocketStatus, WebSocketTask};
+use core::time::Duration;
+use yew::services::timeout::TimeoutTask;
+
+/// Amount of time to wait before attempting reconnect
+const RECONNECT_DURATION: Duration = Duration::from_secs(2);
+
+/// Maintains state of the websocket
+enum SocketState {
+    Disconnected,
+    ReconnectWait(TimeoutTask),
+    Connecting,
+    Connected,
+}
+
+impl SocketState {
+    fn is_connected(&self) -> bool {
+        match self {
+            Self::Connected => true,
+            _ => false,
+        }
+    }
+}
 
 struct Model {
-    ws: Option<WebSocketTask>,
     link: ComponentLink<Model>,
+    socket: Option<WebSocketTask>,
+    socket_state: SocketState,
     text: String,
     server_data: String,
 }
 
 #[derive(Debug)]
 enum Msg {
-    Connect,                            // connect to websocket server
-    Disconnected,                       // disconnected from server
-    Ignore,                             // ignore this message
-    TextInput(String),                  // text was input in the input box
-    SendText,                           // send our text to server
+    Connect,                                            // connect to websocket server
+    Connected,                                          // connected to server
+    Disconnected,                                       // disconnected from server
+    TextInput(String),                                  // text was input in the input box
+    SendText,                                           // send our text to server
     Received(anyhow::Result<String>),                   // data received from server
 }
 
@@ -29,8 +52,9 @@ impl Component for Model {
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
         link.send_message(Msg::Connect);
         Model {
-            ws: None,
             link,
+            socket: None,
+            socket_state: SocketState::Disconnected,
             text: String::new(),
             server_data: String::new(),
         }
@@ -47,17 +71,28 @@ impl Component for Model {
                         WebSocketStatus::Closed | WebSocketStatus::Error => {
                             Msg::Disconnected
                         },
-                        _ => Msg::Ignore,
+                        WebSocketStatus::Opened => {
+                            Msg::Connected
+                        }
                     }
                 });
-                if self.ws.is_none() {
-                    let task = WebSocketService::connect("ws://localhost:8080/ws/", cb_data, cb_error.into()).unwrap();
-                    self.ws = Some(task);
+                if !self.socket_state.is_connected() {
+                    self.socket = Some(WebSocketService::connect("ws://localhost:8080/ws/", cb_data, cb_error.into()).unwrap());
+                    self.socket_state = SocketState::Connecting;
+                }
+                true
+            },
+            Msg::Connected => {
+                if let SocketState::Connecting = self.socket_state {
+                    self.socket_state = SocketState::Connected;
                 }
                 true
             },
             Msg::Disconnected => {
-                self.ws = None;
+                self.socket = None;
+                self.socket_state = SocketState::ReconnectWait(TimeoutService::spawn(RECONNECT_DURATION, self.link.callback(|_| {
+                    Msg::Connect
+                })));
                 true
             },
             _ => {
@@ -74,7 +109,7 @@ impl Component for Model {
         html! {
             <div>
                 <p>{ "Hello, world" }</p>
-                <p>{ "Connected: "} { !self.ws.is_none() }</p><br />
+                <p>{ "Connected: "} { self.socket_state.is_connected() }</p><br />
             </div>
         }
     }
