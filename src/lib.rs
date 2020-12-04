@@ -6,31 +6,29 @@ use yew::services::{ConsoleService, TimeoutService};
 use yew::services::websocket::{WebSocketService, WebSocketStatus, WebSocketTask};
 use core::time::Duration;
 use yew::services::timeout::TimeoutTask;
+use std::rc::Rc;
 
 /// Amount of time to wait before attempting reconnect
 const RECONNECT_DURATION: Duration = Duration::from_secs(2);
 
 /// Maintains state of the websocket
-enum SocketState {
+enum Socket {
     Disconnected,
-    ReconnectWait(TimeoutTask),
-    Connecting,
-    Connected,
+    ReconnectWait(Rc<TimeoutTask>),
+    Connecting(Rc<WebSocketTask>),
+    Connected(Rc<WebSocketTask>),
 }
 
-impl SocketState {
+impl Socket {
     fn is_connected(&self) -> bool {
-        match self {
-            Self::Connected => true,
-            _ => false,
-        }
+        if let Self::Connected(_) = self { true } else { false }
     }
 }
 
 struct Model {
     link: ComponentLink<Model>,
-    socket: Option<WebSocketTask>,
-    socket_state: SocketState,
+    // socket: Option<WebSocketTask>,
+    socket: Socket,
     text: String,
     server_data: String,
 }
@@ -53,8 +51,7 @@ impl Component for Model {
         link.send_message(Msg::Connect);
         Model {
             link,
-            socket: None,
-            socket_state: SocketState::Disconnected,
+            socket: Socket::Disconnected,
             text: String::new(),
             server_data: String::new(),
         }
@@ -76,23 +73,25 @@ impl Component for Model {
                         }
                     }
                 });
-                if !self.socket_state.is_connected() {
-                    self.socket = Some(WebSocketService::connect("ws://localhost:8080/ws/", cb_data, cb_error.into()).unwrap());
-                    self.socket_state = SocketState::Connecting;
+                if !self.socket.is_connected() {
+                    let socket = WebSocketService::connect("ws://localhost:8080/ws/", cb_data, cb_error.into()).unwrap();
+                    self.socket = Socket::Connecting(Rc::new(socket));
                 }
-                true
+                false
             },
             Msg::Connected => {
-                if let SocketState::Connecting = self.socket_state {
-                    self.socket_state = SocketState::Connected;
+                if let Socket::Connecting(socket) = &self.socket {
+                    self.socket = Socket::Connected(Rc::clone(socket));
                 }
                 true
             },
             Msg::Disconnected => {
-                self.socket = None;
-                self.socket_state = SocketState::ReconnectWait(TimeoutService::spawn(RECONNECT_DURATION, self.link.callback(|_| {
+                let timer = TimeoutService::spawn(
+                    RECONNECT_DURATION,
+                    self.link.callback(|_| {
                     Msg::Connect
-                })));
+                }));
+                self.socket = Socket::ReconnectWait(Rc::new(timer));
                 true
             },
             _ => {
@@ -109,7 +108,7 @@ impl Component for Model {
         html! {
             <div>
                 <p>{ "Hello, world" }</p>
-                <p>{ "Connected: "} { self.socket_state.is_connected() }</p><br />
+                <p>{ "Connected: "} { self.socket.is_connected() }</p><br />
             </div>
         }
     }
