@@ -21,13 +21,15 @@ enum Socket {
 
 impl Socket {
     fn is_connected(&self) -> bool {
-        if let Self::Connected(_) = self { true } else { false }
+        match self {
+            Self::Connected(_) => true,
+            _ => false
+        }
     }
 }
 
 struct Model {
     link: ComponentLink<Model>,
-    // socket: Option<WebSocketTask>,
     socket: Socket,
     text: String,
     server_data: String,
@@ -106,10 +108,10 @@ impl Component for Model {
 
     fn view(&self) -> Html {
         html! {
-            <div>
+            <body>
                 <p>{ "Hello, world" }</p>
                 <p>{ "Connected: "} { self.socket.is_connected() }</p><br />
-            </div>
+            </body>
         }
     }
 }
