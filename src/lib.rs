@@ -1,13 +1,39 @@
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
+use yew::format::Json;
+use yew::services::{ConsoleService, TimeoutService};
+use yew::services::websocket::{WebSocketService, WebSocketStatus, WebSocketTask};
+use core::time::Duration;
+use yew::services::timeout::TimeoutTask;
+use std::rc::Rc;
 
-struct Model {
-    link: ComponentLink<Self>,
-    value: i64,
+mod socket;
+
+use socket::Socket;
+
+/// Amount of time to wait before attempting reconnect
+const RECONNECT_DURATION: Duration = Duration::from_secs(2);
+
+/// UI Socket url
+fn ui_socket_url() -> String {
+    format!("ws://{}/socket/ui", yew::utils::host().unwrap()).to_string()
 }
 
+struct Model {
+    link: ComponentLink<Model>,
+    socket: Socket,
+    text: String,
+    server_data: String,
+}
+
+#[derive(Debug)]
 enum Msg {
-    AddOne,
+    Connect,                                            // connect to websocket server
+    Connected,                                          // connected to server
+    Disconnected,                                       // disconnected from server
+    TextInput(String),                                  // text was input in the input box
+    SendText,                                           // send our text to server
+    Received(anyhow::Result<String>),                   // data received from server
 }
 
 impl Component for Model {
@@ -15,34 +41,74 @@ impl Component for Model {
     type Properties = ();
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Self {
+        link.send_message(Msg::Connect);
+        Model {
             link,
-            value: 0,
+            socket: Socket::Disconnected,
+            text: String::new(),
+            server_data: String::new(),
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
+        ConsoleService::log(&format!("update: {:?}", msg));
         match msg {
-            Msg::AddOne => self.value += 1
+            Msg::Connect => {
+                let cb_data = self.link.callback(|Json(data)| Msg::Received(data));
+                let cb_error = self.link.callback(|input| {
+                    ConsoleService::log(&format!("Notification: {:?}", input));
+                    match input {
+                        WebSocketStatus::Closed | WebSocketStatus::Error => {
+                            Msg::Disconnected
+                        },
+                        WebSocketStatus::Opened => {
+                            Msg::Connected
+                        }
+                    }
+                });
+                if !self.socket.is_connected() {
+                    let socket = WebSocketService::connect(&ui_socket_url(), cb_data, cb_error.into()).unwrap();
+                    self.socket = Socket::Connecting(Rc::new(socket));
+                }
+                false
+            },
+            Msg::Connected => {
+                if let Socket::Connecting(socket) = &self.socket {
+                    self.socket = Socket::Connected(Rc::clone(socket));
+                }
+                true
+            },
+            Msg::Disconnected => {
+                let timer = TimeoutService::spawn(
+                    RECONNECT_DURATION,
+                    self.link.callback(|_| {
+                    Msg::Connect
+                }));
+                self.socket = Socket::ReconnectWait(Rc::new(timer));
+                true
+            },
+            _ => {
+                false
+            }
         }
-        true
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
+    fn change(&mut self, _: Self::Properties) -> ShouldRender {
         false
     }
 
     fn view(&self) -> Html {
         html! {
-            <div>
-                <button onclick=self.link.callback(|_| Msg::AddOne)>{ "+1 "}</button>
-                <p>{ self.value }</p>
-            </div>
+            <body>
+                <p>{ "Hello, world" }</p>
+                <p>{ "Connected: "} { self.socket.is_connected() }</p><br />
+            </body>
         }
     }
 }
 
 #[wasm_bindgen(start)]
 pub fn run_app() {
+    yew::initialize();
     App::<Model>::new().mount_to_body();
 }
