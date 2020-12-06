@@ -87,6 +87,13 @@ impl Component for Model {
                 self.socket = Socket::ReconnectWait(Rc::new(timer));
                 true
             },
+            Msg::Received(result) => {
+                match result {
+                    Ok(text) => self.text = text,
+                    Err(err) => self.text = format!("error: {}", err),
+                }
+                true
+            }
             _ => {
                 false
             }
@@ -100,8 +107,8 @@ impl Component for Model {
     fn view(&self) -> Html {
         html! {
             <body>
-                <p>{ "Hello, world" }</p>
                 <p>{ "Connected: "} { self.socket.is_connected() }</p><br />
+                <p>{ "Received: "} { &self.text }</p><br />
             </body>
         }
     }
