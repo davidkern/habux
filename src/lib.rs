@@ -26,7 +26,7 @@ fn ui_socket_url() -> String {
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Data {
     Empty,
-    Datetime(DateTime<Utc>),
+    SystemTime(DateTime<Utc>),
 }
 
 struct Model {
