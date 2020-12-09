@@ -6,10 +6,14 @@ use yew::services::websocket::{WebSocketService, WebSocketStatus, WebSocketTask}
 use core::time::Duration;
 use yew::services::timeout::TimeoutTask;
 use std::rc::Rc;
-
+use serde::{Serialize, Deserialize};
+use std::collections::VecDeque;
 mod socket;
 
 use socket::Socket;
+use chrono::{DateTime, Utc};
+use anyhow::Error;
+
 
 /// Amount of time to wait before attempting reconnect
 const RECONNECT_DURATION: Duration = Duration::from_secs(2);
@@ -19,10 +23,16 @@ fn ui_socket_url() -> String {
     format!("ws://{}/socket/ui", yew::utils::host().unwrap()).to_string()
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub enum Data {
+    Empty,
+    Datetime(DateTime<Utc>),
+}
+
 struct Model {
     link: ComponentLink<Model>,
     socket: Socket,
-    text: String,
+    data: VecDeque<Data>,
     server_data: String,
 }
 
@@ -33,7 +43,7 @@ enum Msg {
     Disconnected,                                       // disconnected from server
     TextInput(String),                                  // text was input in the input box
     SendText,                                           // send our text to server
-    Received(anyhow::Result<String>),                   // data received from server
+    Received(Data),                                     // data received from server
 }
 
 impl Component for Model {
@@ -45,7 +55,7 @@ impl Component for Model {
         Model {
             link,
             socket: Socket::Disconnected,
-            text: String::new(),
+            data: Default::default(),
             server_data: String::new(),
         }
     }
@@ -54,7 +64,23 @@ impl Component for Model {
         ConsoleService::log(&format!("update: {:?}", msg));
         match msg {
             Msg::Connect => {
-                let cb_data = self.link.callback(|Json(data)| Msg::Received(data));
+                let cb_data = self.link.callback(|result: Result<Vec<u8>, Error>| {
+                    match result {
+                        Ok(bytes) => {
+                            match bincode::deserialize(&bytes) {
+                                Ok(data) => Msg::Received(data),
+                                Err(_) => {
+                                    ConsoleService::log("deserialization failure, disconnecting");
+                                    Msg::Disconnected
+                                }
+                            }
+                        },
+                        Err(_) => {
+                            ConsoleService::log("socket error, disconnecting");
+                            Msg::Disconnected
+                        },
+                    }
+                });
                 let cb_error = self.link.callback(|input| {
                     ConsoleService::log(&format!("Notification: {:?}", input));
                     match input {
@@ -67,7 +93,7 @@ impl Component for Model {
                     }
                 });
                 if !self.socket.is_connected() {
-                    let socket = WebSocketService::connect(&ui_socket_url(), cb_data, cb_error.into()).unwrap();
+                    let socket = WebSocketService::connect_binary(&ui_socket_url(), cb_data, cb_error.into()).unwrap();
                     self.socket = Socket::Connecting(Rc::new(socket));
                 }
                 false
@@ -87,13 +113,11 @@ impl Component for Model {
                 self.socket = Socket::ReconnectWait(Rc::new(timer));
                 true
             },
-            Msg::Received(result) => {
-                match result {
-                    Ok(text) => self.text = text,
-                    Err(err) => self.text = format!("error: {}", err),
-                }
+            Msg::Received(data) => {
+                self.data.push_front(data);
+                self.data.truncate(10);
                 true
-            }
+            },
             _ => {
                 false
             }
@@ -107,10 +131,17 @@ impl Component for Model {
     fn view(&self) -> Html {
         html! {
             <body>
-                <p>{ "Connected: "} { self.socket.is_connected() }</p><br />
-                <p>{ "Received: "} { &self.text }</p><br />
+                <p>{ "Connected: "} { self.socket.is_connected() }</p>
+                <p>{ "Received: "}</p>
+                { for self.data.iter().map(render_data) }
             </body>
         }
+    }
+}
+
+fn render_data(data: &Data) -> Html {
+    html! {
+        <>{ format!("{:?}", data) }<br /></>
     }
 }
 
