@@ -4,13 +4,18 @@ HAB truck camper frontend user interface.
 
 ## Dependencies
 
-* `cargo install wasm-pack`
+Versions listed are at the time of this writing. Different versions may work as well.
 
-## Build/Start/Test
+* `rustup target add wasm32-unknown-unknown`
+* `cargo install --locked trunk` - v.0.9.0
+* `cargo install wasm-bindgen-cli` - v0.2.71
+* `sudo apt install binaryen` - v99
 
-* `yarn build` - build production assets to `dist`
-* `yarn start` - build and watch for development
-* `yarn test` - run cargo and wasm-pack tests
+## Build/Run/Test
+
+* Build: `trunk build`
+* Run Server and Watch: `trunk serve`
+* Test: `cargo test`
 
 ## License
 

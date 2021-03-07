@@ -1,8 +1,4 @@
 /dist
-/pkg
-/static
 /target
 *.log
 Cargo.lock
-
-!/static/index.html
