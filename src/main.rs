@@ -145,8 +145,7 @@ fn render_data(data: &Data) -> Html {
     }
 }
 
-#[wasm_bindgen(start)]
-pub fn run_app() {
+pub fn main() {
     yew::initialize();
     App::<Model>::new().mount_to_body();
 }
