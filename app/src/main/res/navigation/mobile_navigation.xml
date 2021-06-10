@@ -3,23 +3,29 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_home">
+    app:startDestination="@+id/nav_overview">
 
     <fragment
-        android:id="@+id/nav_home"
-        android:name="io.mju.habux.ui.home.HomeFragment"
-        android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/nav_overview"
+        android:name="io.mju.habux.ui.overview.OverviewFragment"
+        android:label="@string/menu_overview"
+        tools:layout="@layout/fragment_overview" />
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="io.mju.habux.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
+        android:id="@+id/nav_system"
+        android:name="io.mju.habux.ui.system.SystemFragment"
+        android:label="@string/menu_system"
+        tools:layout="@layout/fragment_system" />
 
     <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="io.mju.habux.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
+        android:id="@+id/nav_climate"
+        android:name="io.mju.habux.ui.climate.ClimateFragment"
+        android:label="@string/menu_climate"
+        tools:layout="@layout/fragment_climate" />
+
+    <fragment
+        android:id="@+id/nav_geography"
+        android:name="io.mju.habux.ui.geography.GeographyFragment"
+        android:label="@string/menu_geography"
+        tools:layout="@layout/fragment_geography" />
 </navigation>

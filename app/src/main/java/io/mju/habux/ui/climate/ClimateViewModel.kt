@@ -1,13 +1,13 @@
-package io.mju.habux.ui.home
+package io.mju.habux.ui.climate
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class HomeViewModel : ViewModel() {
+class ClimateViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
-        value = "This is home Fragment"
+        value = "This is climate Fragment"
     }
     val text: LiveData<String> = _text
 }

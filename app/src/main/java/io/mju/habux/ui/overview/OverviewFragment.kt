@@ -1,4 +1,4 @@
-package io.mju.habux.ui.home
+package io.mju.habux.ui.overview
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,9 +10,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import io.mju.habux.R
 
-class HomeFragment : Fragment() {
+class OverviewFragment : Fragment() {
 
-    private lateinit var homeViewModel: HomeViewModel
+    private lateinit var homeViewModel: OverviewViewModel
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -20,9 +20,9 @@ class HomeFragment : Fragment() {
             savedInstanceState: Bundle?
     ): View? {
         homeViewModel =
-                ViewModelProvider(this).get(HomeViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_home, container, false)
-        val textView: TextView = root.findViewById(R.id.text_home)
+                ViewModelProvider(this).get(OverviewViewModel::class.java)
+        val root = inflater.inflate(R.layout.fragment_overview, container, false)
+        val textView: TextView = root.findViewById(R.id.text_overview)
         homeViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
         })
