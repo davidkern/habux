@@ -22,9 +22,7 @@ class OverviewFragment : Fragment() {
         homeViewModel =
                 ViewModelProvider(this).get(OverviewViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_overview, container, false)
-        val textView: TextView = root.findViewById(R.id.text_overview)
         homeViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
         })
         return root
     }
