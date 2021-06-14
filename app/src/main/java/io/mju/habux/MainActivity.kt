@@ -83,13 +83,13 @@ class MainActivity : AppCompatActivity() {
                     { response ->
                         val mpptList = response.getJSONArray("mppt")
                         var batteryVoltage = 0.0
-                        var solarPower = 0.0
+                        var solarPower = 0
 
                         for (i in 0 until mpptList.length()) {
                             val mppt = mpptList.getJSONObject(i)
                             val name = mppt.getString("name")
                             val telemetry = mppt.getJSONObject("telemetry")
-                            val panelPower = telemetry.getDouble("panel_power")
+                            val panelPower = telemetry.getInt("panel_power")
 
                             // solar power is sum of all panels
                             solarPower += panelPower
