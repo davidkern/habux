@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_overview"
+            android:icon="@drawable/ic_menu_overview"
+            android:title="@string/menu_overview" />
+        <item
+            android:id="@+id/nav_system"
+            android:icon="@drawable/ic_menu_system"
+            android:title="@string/menu_system" />
+        <item
+            android:id="@+id/nav_climate"
+            android:icon="@drawable/ic_menu_climate"
+            android:title="@string/menu_climate" />
+        <item
+            android:id="@+id/nav_geography"
+            android:icon="@drawable/ic_menu_geography"
+            android:title="@string/menu_geography" />
+    </group>
+</menu>
