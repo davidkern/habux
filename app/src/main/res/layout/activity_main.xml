@@ -8,10 +8,19 @@
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
-    <include
+    <!--include
         layout="@layout/app_bar_main"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent" /-->
+    <TextView
+        android:id="@+id/textErrorMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        tools:layout_editor_absoluteX="4dp"
+        tools:layout_editor_absoluteY="6dp" />
+
+    <include layout="@layout/content_main" />
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"

@@ -71,17 +71,17 @@ class MainViewModel : ViewModel() {
 
                     // clear errors
                     this._secondsSinceLastUpdate.value = null;
-                    this._telemetryErrorMessage.value = null;
+                    this._telemetryErrorMessage.value = "";
                 },
                 { error ->
+                    this._telemetryErrorMessage.value = error.message
+
                     val time = this._secondsSinceLastUpdate.value
                     if (time != null) {
                         this._secondsSinceLastUpdate.value = time + REFRESH_INTERVAL_SECONDS;
                     } else {
                         this._secondsSinceLastUpdate.value = REFRESH_INTERVAL_SECONDS;
                     }
-
-                    this._telemetryErrorMessage.value = error.message
                 }
         ))
     }
