@@ -22,5 +22,9 @@
             android:id="@+id/nav_geography"
             android:icon="@drawable/ic_menu_geography"
             android:title="@string/menu_geography" />
+        <item
+            android:id="@+id/nav_orientation"
+            android:icon="@drawable/ic_menu_orientation"
+            android:title="Orientation" />
     </group>
 </menu>

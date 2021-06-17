@@ -28,4 +28,10 @@
         android:name="io.mju.habux.ui.geography.GeographyFragment"
         android:label="@string/menu_geography"
         tools:layout="@layout/fragment_geography" />
+
+    <fragment
+        android:id="@+id/nav_orientation"
+        android:name="io.mju.habux.ui.orientation.OrientationFragment"
+        android:label="Orientation"
+        tools:layout="@layout/fragment_orientation" />
 </navigation>
