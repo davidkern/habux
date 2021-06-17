@@ -8,24 +8,32 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import io.mju.habux.MainViewModel
 import io.mju.habux.R
+import io.mju.habux.databinding.FragmentSystemBinding
 
 class SystemFragment : Fragment() {
-
+    private lateinit var mainViewModel: MainViewModel
     private lateinit var galleryViewModel: SystemViewModel
+    private lateinit var ui: FragmentSystemBinding
 
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
+        mainViewModel =
+            ViewModelProvider(requireActivity()).get(MainViewModel::class.java)
+
         galleryViewModel =
                 ViewModelProvider(this).get(SystemViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_system, container, false)
-        val textView: TextView = root.findViewById(R.id.text_system)
-        galleryViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
+
+        ui = FragmentSystemBinding.inflate(inflater)
+
+        mainViewModel.underCounterTemp.observe(viewLifecycleOwner, Observer { imu_temp ->
+            ui.textImuTemperature.text = "%.1f°C".format(imu_temp)
         })
-        return root
+
+        return ui.root
     }
 }

@@ -2,6 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main_drawer"
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="single">
@@ -21,5 +22,9 @@
             android:id="@+id/nav_geography"
             android:icon="@drawable/ic_menu_geography"
             android:title="@string/menu_geography" />
+        <item
+            android:id="@+id/nav_orientation"
+            android:icon="@drawable/ic_menu_orientation"
+            android:title="Orientation" />
     </group>
 </menu>
