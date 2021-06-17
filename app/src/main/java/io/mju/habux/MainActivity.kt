@@ -21,6 +21,7 @@ import io.mju.habux.databinding.ContentMainBinding
 
 const val HABCTL_URL = "http://10.42.0.1:8080"
 const val REFRESH_INTERVAL_SECONDS = 5
+const val MISSING_DATA = "—"
 
 class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
