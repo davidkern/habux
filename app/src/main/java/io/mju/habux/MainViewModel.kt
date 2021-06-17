@@ -141,7 +141,7 @@ class MainViewModel : ViewModel() {
 
                             // read temperature
                             try {
-                                val temp = imu.getDouble("temperature")
+                                val temp = telemetry.getDouble("temperature")
 
                                 this._underCounterTemperature.value = temp
                             } catch (e: JSONException) {
